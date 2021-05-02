@@ -16,6 +16,8 @@ The task is episodic, and in order to solve the environment, the agent must get 
 
 
 
+
+
 ### State and Action Spaces
 
 The state space consists of 8 dimensions and is continuous.

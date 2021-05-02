@@ -14,6 +14,10 @@ The Agent was trained within 2049 episodes: <br>
 There was almost no growth observed in the beginning of training. After a short period of mediocre play, the agents
 learned to play the game almost perfectly. This was surprising to me.
 
+After being trained the agent plateaued. The agent plateaued at a value of at least 1.4.
+
+![image info](./drawables/training2.png)
+
 ## Learning Algorithm
 
 Two agents using Deep Deterministic Policy Gradient (DDPG) were used to train the agent. However both agents share a

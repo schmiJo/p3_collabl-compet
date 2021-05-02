@@ -32,8 +32,8 @@ For further information on training please read the Report.md.
 ## Getting Started
 
 ###Prerequisites
-Python 3.6
-Unity
+Python 3.6 <br>
+Unity <br>
 Conda
 
 ##Installation:
@@ -61,11 +61,11 @@ activate drlnd
 ```
 pip install -r requirements.txt
 ```
-5. Before running the Continuous_Control.ipynb change the kernel to match the drlnd environment by using the drop down Kernel menu.
+5. Before running the Tennis.ipynb change the kernel to match the drlnd environment by using the drop down Kernel menu.
 
 
 Download the unity environment using the following link for macOs: <br>
-https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/one_agent/Reacher.app.zip
+https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis.app.zip
 
 
 More instructions for the installation can be found under: <br>

@@ -13,7 +13,7 @@ GAMMA = 0.99  # discount factor
 TAU = 1e-3  # for soft update of target parameters
 LEARNING_RATE_ACTOR = 1.5e-4  # learning rate of the actor
 LEARNING_RATE_CRITIC = 2.1e-4  # learning rate of the critic
-
+UPDATE_EVERY = 30
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
@@ -28,13 +28,14 @@ class AgentList():
 
         self.agents = []
 
+        self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
+
         for a in range(self.agents_count):
             # create all the agents
-            self.agents.append(Agent(state_size, action_size, random_seed))
+            self.agents.append(Agent(state_size, action_size, random_seed, self.memory))
 
     def step(self, state: np.ndarray, action, reward, next_state, done):
         """Save all the steps in the global replay buffer"""
-
         for i, agent in enumerate(self.agents):
             agent.step(state[i], action[i], reward[i], next_state[i], done[i])
 
@@ -79,7 +80,7 @@ class AgentList():
 class Agent():
     """Interacts with and learns from the environment."""
 
-    def __init__(self, state_size, action_size, random_seed):
+    def __init__(self, state_size, action_size, random_seed, memory):
         """Initialize an Agent object. Who interacts with and learns from the environment
 
         Params
@@ -106,8 +107,8 @@ class Agent():
         self.hard_update(self.actor_local, self.actor_target)
         self.hard_update(self.critic_local, self.critic_target)
 
-        # Initialize the ReplayBuffe
-        self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
+        # Initialize the ReplayBuffer
+        self.memory = memory
 
         # Noise process
         self.noise = OUNoise(action_size, random_seed)

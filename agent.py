@@ -1,5 +1,3 @@
-
-
 import numpy as np
 import random
 import copy
@@ -16,8 +14,66 @@ TAU = 1e-3  # for soft update of target parameters
 LEARNING_RATE_ACTOR = 1.5e-4  # learning rate of the actor
 LEARNING_RATE_CRITIC = 2.1e-4  # learning rate of the critic
 
-
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+
+class AgentList():
+    """A list of multiple agents who interact with and learn from an environment"""
+
+    def __init__(self, state_size, action_size, agents_count, random_seed):
+        self.state_size: int = state_size
+        self.action_size: int = action_size
+        self.agents_count: int = agents_count
+        self.seed = random.seed(random_seed)
+
+        self.agents = []
+
+        for a in range(self.agents_count):
+            # create all the agents
+            self.agents.append(Agent(state_size, action_size, random_seed))
+
+    def step(self, state: np.ndarray, action, reward, next_state, done):
+        """Save all the steps in the global replay buffer"""
+
+        for i, agent in enumerate(self.agents):
+            agent.step(state[i], action[i], reward[i], next_state[i], done[i])
+
+    def act(self, state: np.ndarray, add_noise: bool) -> np.ndarray:
+        """determine all the actions of the different agents
+        Returns an np.ndarray with the dimensions agents_count x action_size
+
+        === Params
+        state: state is a one dimensional array
+        """
+
+        actions = []
+
+        for i, agent in enumerate(self.agents):
+            actions.append(agent.act(state[i], add_noise=add_noise))
+
+        np_actions = np.array(actions)
+
+        return np_actions
+
+    def save_state(self):
+        """Save the state (weights and biases) of all the agents"""
+        for a in range(self.agents_count):
+            self.agents[a].save_weights(path='./weights' + str(a) + '/')
+
+    def restore_state(self):
+        """Restore the saved state of all the agents that were saved"""
+        for a in range(self.agents_count):
+            self.agents[a].restore_weights(path='./weights' + str(a) + '/')
+
+    def reset_noise(self):
+        for agent in self.agents:
+            agent.reset_noise()
+
+    def is_all_done(self, dones) -> bool:
+        for done in dones:
+            if not done:
+                return False
+        return True
 
 
 class Agent():
@@ -71,18 +127,19 @@ class Agent():
         Params
         ======
             state (array_like): current state
-            eps (float): epsilon, for epsilon-greedy action selection
         """
         state: torch.Tensor = torch.from_numpy(state).float().to(device)
+
         self.actor_local.eval()
         with torch.no_grad():
             # Aquire an action by passing the current state to the local actor network
-            action = self.actor_local(state).cpu().data.numpy()
+            action = self.actor_local(state).squeeze().cpu().data.numpy()
         self.actor_local.train()
 
         # Add noise to the action
         if add_noise:
             action += self.noise.sample()
+
         return np.clip(action, -1, 1)
 
     def learn(self, experiences, gamma) -> None:
@@ -154,7 +211,9 @@ class Agent():
 
 
 class ReplayBuffer:
-    """Fixed-size buffer to store experience tuples."""
+    """Fixed-size buffer to store experience tuples.
+    This replay buffer could be improved by utilizing prioritized replay
+    """
 
     def __init__(self, action_size, buffer_size, batch_size, seed):
         """Initialize a ReplayBuffer object.

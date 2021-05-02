@@ -58,12 +58,12 @@ class AgentList():
     def save_state(self):
         """Save the state (weights and biases) of all the agents"""
         for a in range(self.agents_count):
-            self.agents[a].save_weights(path='./weights' + str(a) + '/')
+            self.agents[a].save_weights(increment=a)
 
     def restore_state(self):
         """Restore the saved state of all the agents that were saved"""
         for a in range(self.agents_count):
-            self.agents[a].restore_weights(path='./weights' + str(a) + '/')
+            self.agents[a].restore_weights(increment=a)
 
     def reset_noise(self):
         for agent in self.agents:
@@ -185,25 +185,25 @@ class Agent():
         for target_param, param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(param.data)
 
-    def save_weights(self, path='./weights/') -> None:
+    def save_weights(self, path='./weights/', increment=0) -> None:
         """Saves the weights of the local networks
         (both the agent and the critic)"""
-        torch.save(self.critic_local.state_dict(), path + 'critic')
-        torch.save(self.actor_local.state_dict(), path + 'actor')
+        torch.save(self.critic_local.state_dict(), path + 'critic' + str(increment))
+        torch.save(self.actor_local.state_dict(), path + 'actor' + str(increment))
 
-    def restore_weights(self, path='./weights/') -> None:
+    def restore_weights(self, path='./weights/', increment=0) -> None:
         """Restore the saved local network weights to both the target and the local network"""
 
-        self.critic_local.load_state_dict(torch.load(path + 'critic'))
+        self.critic_local.load_state_dict(torch.load(path + 'critic' + str(increment)))
         self.critic_local.eval()
 
-        self.critic_target.load_state_dict(torch.load(path + 'critic'))
+        self.critic_target.load_state_dict(torch.load(path + 'critic' + str(increment)))
         self.critic_target.eval()
 
-        self.actor_local.load_state_dict(torch.load(path + 'actor'))
+        self.actor_local.load_state_dict(torch.load(path + 'actor' + str(increment)))
         self.actor_local.eval()
 
-        self.actor_target.load_state_dict(torch.load(path + 'actor'))
+        self.actor_target.load_state_dict(torch.load(path + 'actor' + str(increment)))
         self.actor_target.eval()
 
     def reset_noise(self):
